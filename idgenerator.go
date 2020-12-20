@@ -73,9 +73,20 @@ func (gen *RequestIDGenerator) MethodRestrict(methods ...string) *RequestIDGener
 	})
 }
 
-// PathRestrict パスを制限する
+// PathRestrict 指定のパスのみに制限する
 func (gen *RequestIDGenerator) PathRestrict(paths ...WildCard) *RequestIDGenerator {
 	m := WildCardSlice(paths).NotAnyMatcher()
+	return gen.AddRequestCleaner(func(r *Request) *Request {
+		if m(r.Path) {
+			r.Expected = true
+		}
+		return r
+	})
+}
+
+// PathExcept 指定のパス以外に制限する
+func (gen *RequestIDGenerator) PathExcept(paths ...WildCard) *RequestIDGenerator {
+	m := WildCardSlice(paths).AnyMatcher()
 	return gen.AddRequestCleaner(func(r *Request) *Request {
 		if m(r.Path) {
 			r.Expected = true
@@ -101,8 +112,8 @@ func (gen *RequestIDGenerator) HeaderAccept(keys ...WildCard) *RequestIDGenerato
 	})
 }
 
-// HeaderAcceptAll ヘッダを全て利用する
-func (gen *RequestIDGenerator) HeaderAcceptAll() *RequestIDGenerator {
+// HeaderEnable ヘッダを利用する
+func (gen *RequestIDGenerator) HeaderEnable() *RequestIDGenerator {
 	return gen.AddRequestCleaner(func(r *Request) *Request {
 		r.HeaderEnabled = true
 		return r
@@ -113,7 +124,6 @@ func (gen *RequestIDGenerator) HeaderAcceptAll() *RequestIDGenerator {
 func (gen *RequestIDGenerator) HeaderDrop(keys ...WildCard) *RequestIDGenerator {
 	m := WildCardSlice(keys).AnyMatcher()
 	return gen.AddRequestCleaner(func(r *Request) *Request {
-		r.HeaderEnabled = true
 		for k := range r.Header {
 			if m(k) {
 				r.Header.Del(k)
@@ -137,8 +147,8 @@ func (gen *RequestIDGenerator) QueryAccept(keys ...WildCard) *RequestIDGenerator
 	})
 }
 
-// QueryAcceptAll クエリパラメータを全て利用する
-func (gen *RequestIDGenerator) QueryAcceptAll() *RequestIDGenerator {
+// QueryEnable クエリパラメータを利用する
+func (gen *RequestIDGenerator) QueryEnable() *RequestIDGenerator {
 	return gen.AddRequestCleaner(func(r *Request) *Request {
 		r.QueryEnabled = true
 		return r
@@ -149,7 +159,6 @@ func (gen *RequestIDGenerator) QueryAcceptAll() *RequestIDGenerator {
 func (gen *RequestIDGenerator) QueryDrop(keys ...WildCard) *RequestIDGenerator {
 	m := WildCardSlice(keys).AnyMatcher()
 	return gen.AddRequestCleaner(func(r *Request) *Request {
-		r.QueryEnabled = true
 		for k := range r.Query {
 			if m(k) {
 				r.Query.Del(k)
@@ -157,11 +166,6 @@ func (gen *RequestIDGenerator) QueryDrop(keys ...WildCard) *RequestIDGenerator {
 		}
 		return r
 	})
-}
-
-// QueryDropTracking トラッキングパラメータを削除する
-func (gen *RequestIDGenerator) QueryDropTracking() *RequestIDGenerator {
-	return gen.QueryDrop("utm_*", "gclid", "fbclid")
 }
 
 // CookieAccept クッキーを制限する
@@ -178,8 +182,8 @@ func (gen *RequestIDGenerator) CookieAccept(keys ...WildCard) *RequestIDGenerato
 	})
 }
 
-// CookieAcceptAll クッキーを全て利用する
-func (gen *RequestIDGenerator) CookieAcceptAll() *RequestIDGenerator {
+// CookieEnable クッキーを利用する
+func (gen *RequestIDGenerator) CookieEnable() *RequestIDGenerator {
 	return gen.AddRequestCleaner(func(r *Request) *Request {
 		r.CookieEnabled = true
 		return r
@@ -190,7 +194,6 @@ func (gen *RequestIDGenerator) CookieAcceptAll() *RequestIDGenerator {
 func (gen *RequestIDGenerator) CookieDrop(keys ...WildCard) *RequestIDGenerator {
 	m := WildCardSlice(keys).AnyMatcher()
 	return gen.AddRequestCleaner(func(r *Request) *Request {
-		r.CookieEnabled = true
 		for k := range r.Cookies {
 			if m(k) {
 				r.Cookies.Del(k)
