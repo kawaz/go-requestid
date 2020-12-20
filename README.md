@@ -1,2 +1,2 @@
 # go-requestid
-http.Request を集約ルールに基づいtaIDを取得する
+`http.Request` をルールに基づいて一意なIDに変換する
