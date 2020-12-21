@@ -35,7 +35,7 @@ func (config *RequestIDGeneratorConfig) NewGenerator() *RequestIDGenerator {
 	if config.PathRestrict != nil {
 		gen.PathRestrict(*config.PathRestrict...)
 	}
-	if config.NewGenerator().PathRestrict() != nil {
+	if config.PathExcept != nil {
 		gen.PathExcept(*config.PathExcept...)
 	}
 	if config.HeaderEnabled {
