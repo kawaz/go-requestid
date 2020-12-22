@@ -43,7 +43,8 @@ func (r *Request) GenerateID(newHashFunc func() hash.Hash) (RequestID, bool) {
 	hash.Write([]byte("cookie:"))
 	hash.Write([]byte(r.Cookies.Encode()))
 	hash.Write([]byte("\n"))
-	return RequestID(hash.Sum(nil)), true
+	id := hash.Sum(nil)
+	return RequestID(id), true
 }
 
 // Clone Request を複製する
