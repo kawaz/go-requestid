@@ -15,10 +15,12 @@ func (w WildCard) Matcher() StringMatcher {
 			return true
 		}
 	}
-	if w[len(w)] == '*' {
-		prefix := string(w[:len(w)-1])
-		return func(s string) bool {
-			return strings.HasPrefix(s, prefix)
+	if 1 < len(w) {
+		if w[len(w)-1] == '*' {
+			prefix := string(w[:len(w)-1])
+			return func(s string) bool {
+				return strings.HasPrefix(s, prefix)
+			}
 		}
 	}
 	str := string(w)
